@@ -1,0 +1,239 @@
+#################################################################################
+#################################################################################
+# CUBIT Journal File for a geometry of an oblique impact
+# Generated with CUBIT 15.4
+#################################################################################
+#################################################################################
+### Mesh characteristics (once generated)
+### Characteristic length h = 6.043945e-03
+### Number of elements    = 4 309 976
+### Number of Domains:    = 2078
+### Max. weights:         = 8072
+#################################################################################
+#################################################################################
+
+
+
+
+reset
+#################################################################################
+####    PARAMETERS    ###########################################################
+#################################################################################
+#{r=0.1}                          # Radius of the impactor
+#{angle=180}                      # Cylindrical Sector angle in degree
+#{pi=3.14159265358979}
+#{iangle=45*pi/180}               # Incidence of impactor, from vertical
+#{R1=17}                          # Radius of ground cylinder
+#{R2=15}                          # Radius of spherical zone
+#{sb1=0.02}                       # Impactor mesh size
+#{sz4=0.04}                       # Mesh of the central spherical zone
+#{f1=1}                           # zone shape factor
+#{f2=0.7}                         # zone shape factor
+#{f3=0.3333333}                   # zone shape factor
+#{f4=0.1}                         # zone shape factor
+#{f5=0.02}                        # zone shape factor
+#{m1=7}                           # mesh size factor
+#{m2=7}                           # mesh size factor
+#{m3=5}                           # mesh size factor
+#{m4=2.5}                         # mesh size factor
+#{m5=.8}                          # mesh size factor
+#{sw=0.23}                        # mesh size factor
+#################################################################################
+#################################################################################
+
+###############
+# IMPACTOR
+###############
+create sphere radius {r}
+move volume 1 z {r}
+
+###############
+# GROUND
+###############
+create sphere radius {R2 * f1}
+create sphere radius {R2 * f2}
+create sphere radius {R2 * f3}
+create sphere radius {R2 * f4}
+create sphere radius {R2 * f5}
+webcut volume all with plane zplane offset 0 noimprint nomerge
+delete volume 2 3 4 5 6
+
+create cylinder height {R1} radius {R1}
+move surface 29 location 0.0 0.0 0.0
+
+####################
+###   SHIFT  #######
+####################
+### Shift the fine ground mesh zone , crater will be slightly shifted
+move volume 11 x {R2*f5*sin(iangle)}
+move volume 10 x {R2*f5*sin(iangle)}
+move volume 9 x {R2*f5*sin(iangle)}
+move volume 8 x {R2*f5*sin(iangle)}
+####################
+####################
+
+chop volume 12 with volume 7
+chop volume 13 with volume 8
+chop volume 15 with volume 9
+chop volume 17 with volume 10
+chop volume 19 with volume 11
+
+webcut volume all with plane yplane offset 0 noimprint nomerge
+delete volume 1 14 16 18 20 22 21
+compress
+
+sweep surface 16 20 23 perpendicular distance {2*sw} keep
+sweep surface 29 39 33 37 27 perpendicular distance {1.1*r} keep
+unite volume 9 13
+unite volume  10 12 14
+unite volume  8 11 15
+compress all
+merge all
+
+
+###############
+# MESH
+################
+### IMPACTOR MESH
+#################
+volume 1 scheme tetmesh
+Trimesher volume gradation 1.1
+volume 1 size {sb1}
+mesh volume 1
+
+### MESH OF CONCENTRIC SPHERICAL GROUND REGIONS
+###############################################
+curve 29 31 size {sz4*m5}
+curve 27 23 size {sz4*m4}
+curve 21 17 size {sz4*m3}
+curve 11 15 size {sz4*m2}
+curve 5 9 size {sz4*m1}
+mesh curve 5 9 11 15 17 21 23 27 29 31
+curve 35 scheme bias fine size {sz4*m5} coarse size {sz4*m4} start vertex 21
+curve 33 scheme bias fine size {sz4*m5} coarse size {sz4*m4} start vertex 20
+mesh curve 33 35
+curve 24 scheme bias fine size {sz4*m4} coarse size {sz4*m3} start vertex 17
+curve 26 scheme bias fine size {sz4*m4} coarse size {sz4*m3} start vertex 16
+mesh curve 24 26
+curve 20 scheme bias fine size {sz4*m3} coarse size {sz4*m2} start vertex 12
+curve 18 scheme bias fine size {sz4*m3} coarse size {sz4*m2} start vertex 13
+mesh curve 20 18
+curve 14 scheme bias fine size {sz4*m2} coarse size {sz4*m1} start vertex 8
+curve 12 scheme bias fine size {sz4*m2} coarse size {sz4*m1} start vertex 9
+mesh curve 14 12
+
+surface 8 9 12 13 16 17 23 24 20 22 scheme TriDelaunay
+surface 24 sizing function type bias start curve 31 finish curve 27
+surface 23 sizing function type bias start curve 29 finish curve 23
+surface 17 sizing function type bias start curve 27 finish curve 21
+surface 16 sizing function type bias start curve 23 finish curve 17
+surface 13 sizing function type bias start curve 21 finish curve 15
+surface 12 sizing function type bias start curve 17 finish curve 11
+surface 9 sizing function type bias start curve 15 finish curve 9
+surface 8 sizing function type bias start curve 11 finish curve 5
+mesh surface 8 9 12 13 16 17 23 24 20 22
+
+surface 7 10 14 18 21 scheme Triadvance
+surface 21 size {sz4 * m5}
+surface 18 size {sz4 * m4}
+surface 14 size  {sz4 * m3}
+surface 10 size  {sz4 * m2}
+surface 7 size  {sz4 * m1}
+surface 4 5 6 scheme TriDelaunay
+surface 4 5 6 size {sz4*m1}
+mesh surface 4 5 6 7 10 14 18 21
+
+volume 7 6 5 4 3 2 scheme tetmesh
+volume 6 size {sz4 * m5}
+volume 7 size {sz4 * m4}
+volume 5 size {sz4 * m3}
+volume 4 size {sz4 * m2}
+volume 3 2  size {sz4 * m1}
+mesh volume 7 6 5 4 3 2
+
+unmerge all
+merge volume 2 3 4 5 7 6
+unite volume 2 3 4 include_mesh
+unite volume 5 7 6 include_mesh
+
+### WALL MESH
+#############
+merge volume 8 9 10
+curve 97 93 65 61 69 73 77 81 85 89 58 95 38 41 size {sw}
+mesh curve 97 93 65 61 69 73 77 81 85 89 58 95 38 41
+curve 48 44 40 57 45 98 size {sw}
+mesh curve 48 44 40 57 45 98
+
+volume 8 9 10scheme tetmesh
+volume 8 9 10 size {sw}
+mesh volume 8 9 10
+
+unite volume 8 9 10 include_mesh
+
+##########################
+# GENERATE NRB AND MESH IT
+##########################
+create cylinder height {R1+sz4*m1*0.9} radius {R1+sz4*m1*0.9}
+move surface 91 location 0.0 0.0 0.0
+webcut volume 11 with plane yplane offset 0 noimprint nomerge
+chop volume 12 with volume 2 keep
+split body 14
+delete volume 11 12 13 15
+merge volume 14 2
+
+volume 14 scheme Tetmesh
+volume 14 size {sz4*m1}
+mesh volume 14
+
+
+
+unmerge volume all
+###############
+# SIDESET
+###############
+Sideset 1 surface 4 17
+Sideset 1 name "atmosphere"
+
+###############
+# NODESET
+###############
+nodeset 1 Curve 10
+nodeset 1 name "LineTank"     # Used if gravity included / Defined first
+
+nodeset 2 Surface 56
+nodeset 2 name "SideTank"     # Used if gravity included / Defined second, so it doesn't include LineTank
+
+nodeset 3 Surface 57
+nodeset 3 name "BottomTank"   # Used if gravity included / Defined third, so it doesn't include LineTank
+
+nodeset 4 volume 1
+nodeset 4 name "impactor"     # Impactor nodes
+
+nodeset 5 volume 8
+nodeset 5 name "walls"        # Wall nodes
+
+nodeset 6 surface 3
+nodeset 6 name "slides"       # Symmetry axis : elements sliding along z
+
+nodeset 7 surface 107 108
+nodeset 7 name "nrb"          # Outer boundary of the nrb
+
+
+################
+# BLOCKS
+################
+block 1 volume 1
+block 1 name "C_impactor"     # FDEM material : impactor
+
+block 2 volume 2 5
+block 2 name "C_ground"       # FDEM material : target
+
+block 3 volume 8
+block 3 name "Walls"          # FEM material : wall
+
+block 4 volume 14
+block 4 name "N_nrb"          # FEM material : Non-Reflecting Boundary
+
+###############
+Set Abaqus Precision 15
+export Abaqus "./180_mesh.inp" overwrite

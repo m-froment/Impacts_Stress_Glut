@@ -1,0 +1,56 @@
+### INITIAL SIMULATION PARAMETERS
+#################################
+Time step = 2e-8 (4e-8 after ~15ms)
+Image output period = 4e-6s (2e-4s after 4ms)
+Waveform sample period = 2e-5s
+
+### VERTICAL IMPACT : IMPACTOR INITIAL VELOCITY
+###############################################
+Velocity_Fixed_X               = 0.000000e+00
+Velocity_Fixed_Y               = 0.000000e+00
+Velocity_Fixed_Z               = -1000.
+
+### OBLIQUE IMPACT : IMPACTOR INITIAL VELOCITY
+##############################################
+Velocity_Fixed_X               = 707.106
+Velocity_Fixed_Y               = 0.000000e+00
+Velocity_Fixed_Z               = -707.106
+
+### NODESETS BOUNDARY CONDITIONS
+################################
+walls = fixed in X, Y, Z
+NRB = fixed
+slide_y = fixed in X, Y
+slide_y45 = fixed in X, Y, rotated by 45deg (only for vertical impact)
+slide_z = fixed in X, Y
+
+### CONTACT / FRICTION / COHESION betweem group elements
+########################################################
+### Between impactor cells
+##########################
+Cohesion, friction and contact between impactor cells
+  Coulomb_Friction        =   0.7
+  Tensile_Strength        =   14e6     # Pa
+  Shear_Strength          =   66e6     # Pa
+  Mode I fracture energy  =   1.65e3   # J
+
+### Between ground cells
+########################
+Cohesion, friction and contact between ground cells
+  Coulomb_Friction        =   0.75
+  Tensile_Strength        =   8e3     # Pa
+  Shear_Strength          =   5e3     # Pa
+  Mode I fracture energy  =   1e-2    # J 
+
+
+### Between impactor and wall, ground and wall :
+################################################
+No friction, cohesion, only contact
+
+### between ground and NRB
+##########################
+No friction, but contact and cohesion
+  Coulomb_Friction        =   0.75
+  Tensile_Strength        =   150e10   # Pa
+  Shear_Strength          =   200e10   # Pa
+  Mode I fracture energy  =   150e6    # J

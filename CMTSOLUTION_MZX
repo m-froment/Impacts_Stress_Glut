@@ -1,0 +1,13 @@
+PDE 2001  9  9 23 59 17.78  0 0   0.001 -10 4-10 IMPACT
+event name:           IMPACT
+time shift:           0.0000
+half duration:        0.0
+latorUTM:             0
+longorUTM:            0
+depth:                0.000001
+Mrr:                  0
+Mtt:                  0
+Mpp:                  0
+Mrt:                  0
+Mrp:                  1e7
+Mtp:                  0

@@ -1,0 +1,233 @@
+#################################################################################
+#################################################################################
+# CUBIT Journal File for the geometry of a vertical impact
+# Generated with CUBIT 15.4
+#################################################################################
+#################################################################################
+### Mesh characteristics (once generated)
+### Characteristic length h = 5.840059e-03
+### Number of elements    = 2 108 264
+### Number of Domains:    = 1004
+### Max. weights:         = 5984
+#################################################################################
+#################################################################################
+
+
+
+
+reset
+#################################################################################
+####    PARAMETERS    ###########################################################
+#################################################################################
+#{pi=3.14159265358979}
+#{R1=17}        # Radius of the target cylinder
+#{H1=17}        # Height of the target cylinder
+#{angle=45}     # Cylindrical sector angle in degree
+#{ri = 0.1}     # impactor radius
+#{rc = .3}      # radius of fine element sphere
+#{rm = 1.5}     # radius of medium element sphere
+#{rw = 5}       # radius of wall
+#{sb1=0.02}     # small element size
+#{sz1=0.1}      # Mesh gradient in the central spherical zone
+#{sz2=0.22}     # big element size
+#{sw = sz2*1.1} # wall mesh size
+#{A=(sz2-sz1)/(R1-rm)}
+#{B=(sz1*R1-sz2*rm)/(R1-rm)}
+#{szw = A*rw+B} # Mesh size gradient
+#################################################################################
+#################################################################################
+
+###############
+# IMPACTOR
+###############
+create sphere radius {ri}
+move volume 1 z {ri}
+
+###############
+# GROUND
+###############
+create cylinder height {H1} radius {R1}
+create cylinder height {H1+sz2} radius {R1+sz2}
+move surface 4 7 location 0.0 0.0 0.0
+chop volume 3 with volume 2
+compress
+create sphere radius {rc}
+create sphere radius {rm}
+create sphere radius {rw}
+webcut volume 4 5 6 with plane zplane offset 0 noimprint nomerge
+delete volume 4 5 6
+chop volume 2 with volume 9
+chop volume 10 with volume 8
+chop volume 12 with volume 7
+compress
+webcut volume all with plane yplane offset 0 noimprint nomerge
+delete volume 1 2 3 4 5 6
+webcut volume all with general plane xz spin about axis z angle {angle} noimprint nomerge
+delete volume 13 14 15 16 17 18
+compress
+
+
+###############
+# WALL
+###############
+sweep surface 27 24 18 17 22 26 perpendicular distance {sw*2.1} keep
+unite volume 10 11 12
+unite volume 7 8 9
+sweep surface 32 51 perpendicular distance {2.2*ri} keep
+unite volume 7 13
+unite volume 10 14
+sweep surface 34 49 perpendicular distance {sw*2.1} keep
+unite volume 7 10 15 16
+compress
+
+###############
+unmerge surface all               # prevents ground from sticking to wall
+merge surface 19 16               # ground-ground
+merge surface 21 28               # ground-ground
+merge surface 25 30               # ground-ground
+merge surface 9 13                # nrb - ground
+merge surface 10 12
+
+
+###############
+# MESH
+###############
+### CENTRAL GROUND FINE MESH
+############################
+curve 41 42 44 scheme bias fine size {sb1} coarse size {sb1} start vertex 30
+mesh curve 41 42 44
+curve 43 45 46 size {sb1}
+mesh curve 43 45 46
+surface 22 23 24 scheme TriDelaunay
+mesh surface 22 23 24
+volume 5 size {sb1}
+volume 5 scheme tetmesh
+Trimesher volume gradation 1.000001
+mesh volume 5
+
+### CENTRAL GROUND, MEDIUM MESH
+###############################
+curve 47 scheme bias fine size  {sb1} coarse size {sz1} start vertex 32
+curve 7 scheme bias fine size {sb1} coarse size {sz1} start vertex 11
+curve 49 scheme bias fine size {sb1} coarse size {sz1} start vertex 31
+mesh curve 7 47 49
+surface 26 27 29 size {sz1}
+surface 26 27 29 scheme TriDelaunay
+mesh surface 26 27 29
+volume 6 size {sz1}
+volume 6 scheme tetmesh
+Trimesher volume gradation 1.000001
+mesh volume 6
+
+### WALL MESH
+#############
+curve  82 79 68 64 75 72 69 62 66 55 56 58 59 63 61 78 77 74 81 80 size {sw}
+mesh curve 82 79 68 64 75 72 69 62 66 55 56 58 59 63 61 78 77 74 81 80
+volume 7 size {sw}
+volume 7 scheme tetmesh
+mesh volume 7
+
+#### IMPACTOR MESH
+##################
+volume 1 scheme tetmesh
+volume 1 size {sb1}
+mesh volume 1
+
+#### CENTRAL GROUND, LARGER MESH
+################################
+curve 6 scheme bias fine size {sz1} coarse size {szw} start vertex 9
+curve 33 scheme bias fine size  {sz1} coarse size {szw} start vertex 27
+curve 35 scheme bias fine size {sz1} coarse size {szw} start vertex 29
+mesh curve 6 33 35
+surface 17 18 20 size {szw}
+surface 17 18 20 scheme TriDelaunay
+mesh surface 17 18 20
+volume 4 size {sz2}
+volume 4 scheme tetmesh
+Trimesher volume gradation 1.00001
+mesh volume 4
+
+#### OUTER GROUND, LARGE MESH
+#############################
+curve 5 scheme bias fine size {szw} coarse size {sz2} start vertex 8
+curve 26 scheme bias fine size  {szw} coarse size {sz2} start vertex 25
+curve 23 scheme bias fine size {szw} coarse size {sz2} start vertex 22
+mesh curve 5 23 26
+curve  11 16 20 22 3 21 size {sz2}
+mesh curve 11 16 20 22 3 21
+surface 11 14 15 size {sz2}
+surface 11 14 15 scheme TriDelaunay
+mesh surface 11 14 15
+
+volume 3 size {sz2}
+volume 3 scheme tetmesh
+Trimesher volume gradation 1.00001
+mesh volume 3
+
+unite volume 4 5 6  include_mesh
+
+### NRB MESH
+############
+volume 2 size {sz2}
+volume 2 scheme tetmesh
+Trimesher volume gradation 1.00001
+mesh volume 2
+
+
+
+unmerge volume all
+###############
+# SIDESET
+###############
+Sideset 1 surface 15 20
+Sideset 1 name "atmosphere"
+
+###############
+# NODESET
+###############
+nodeset 1 Curve 28
+nodeset 1 name "LineTank"     # Used if gravity included / Defined first
+
+nodeset 2 curve 26
+nodeset 2 name "slide_z"      # Used if gravity included / Elements sliding along z
+
+nodeset 3 Surface 13
+nodeset 3 name "SideTank"     # Used if gravity included / Defined second, so it doesn't include LineTank
+
+nodeset 4 Surface 12
+nodeset 4 name "BottomTank"   # Used if gravity included / Defined third, so it doesn't include LineTank
+
+nodeset 5 volume 1
+nodeset 5 name "impactor"     # Impactor nodes
+
+nodeset 6 volume 7
+nodeset 6 name "walls"        # Wall nodes
+
+nodeset 7 surface 14
+nodeset 7 name "slide_y"      # Symmetry axis : elements sliding along z
+
+nodeset 8 surface 11
+nodeset 8 name "slide_y45"    # Symmetry axis : elements sliding along z
+
+nodeset 9 Surface 5 6
+nodeset 9 name "NRB"          # Outer boundary of the nrb
+
+
+###############
+# BLOCK
+###############
+block 1 volume 1
+block 1 name "C_impactor"     # FDEM material : impactor
+
+block 2 volume 3 4
+block 2 name "C_ground"       # FDEM material : target
+
+block 3 volume 7
+block 3 name "Walls"          # FEM material : wall
+
+block 4 volume 2
+block 4 name "N_nrb"          # FEM material : Non-Reflecting Boundary
+
+###############
+Set Abaqus Precision 15
+export Abaqus "./45_mesh.inp" overwrite

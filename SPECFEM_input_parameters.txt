@@ -1,0 +1,18 @@
+#################################
+### SIMULATION PARAMETERS 
+# number of MPI processors
+NPROC                           = 1024
+
+# time step parameters
+NSTEP                           = 15000
+DT                              = 0.00012
+
+#################################
+### ABSORBING BOUNDARY CONDITIONS
+PML_CONDITIONS                  = .true.
+
+# C-PML top surface
+PML_INSTEAD_OF_FREE_SURFACE     = .false.
+
+# C-PML dominant frequency
+f0_FOR_PML                      = 50.d0
